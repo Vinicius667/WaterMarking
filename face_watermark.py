@@ -1,12 +1,13 @@
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 import os
 from glob import glob
-from typing import Union
+from typing import Union, List
+import numpy.typing as npt
 
-def rotate_image(img, angle):
+
+def rotate_image(img : npt.NDArray[np.uint8], angle: int) -> npt.NDArray[np.uint8]:
     """
     Rotate image by angle degrees without cutting corners.
     """
@@ -21,7 +22,7 @@ def rotate_image(img, angle):
     return cv2.warpAffine(img, M, tuple(size_new.astype(int)))
 
 
-def make_grid(image, x_repeat, y_repeat):
+def make_grid(image : npt.NDArray[np.uint8], x_repeat : int, y_repeat : int)-> npt.NDArray[np.uint8]:
     """
     Create a new image by repeating the input image in a grid.
     """
@@ -30,16 +31,24 @@ def make_grid(image, x_repeat, y_repeat):
     return aux
 
 
-def get_water_mark(image_shape: np.ndarray, watermark_text:str, font_size:int, tilt_angle: float, occurrs : Union[None,tuple] = None, raise_on_incomp : bool = False)-> np.ndarray:
+def get_water_mark(image_shape: List[int], watermark_text:str, font_size:int, tilt_angle: float, occurrs : Union[None,tuple] = None, raise_on_incomp : bool = False)-> npt.NDArray[np.uint8]:
     """
     Retun watermark image. It does not apply the watermark to the original image because, in case it's used for a video, this water_mark can be a used multiple times without having to create it again for each frame.
-    Params:
-        image_shape: shape of the image to be watermarked
-        watermark_text: text to be used as watermark
-        font_size: size of the font
-        occurrs: tuple with the number of times the watermark should be repeated in the x and y direction. This parameter can be omitted and the watermark will be repeated as many times as necessary to cover the entire image.
-        tilt_angle: angle of the watermark
-        raise_on_incomp: if True, raise an error if the watermark cannot be repeated the number of times specified in occurrs. If False, the watermark will be repeated as many times as possible.
+
+    Parameters
+    ----------
+        image_shape: list of 2 intergers
+            shape of the image to be watermarked. If a third dimension is present, it will be ignored.
+        watermark_text: str
+            text to be used as watermark
+        font_size: int
+            size of the font
+        occurrs: tuple of 2 intergers
+            number of times the watermark should be repeated in the x and y direction. This parameter can be omitted and the watermark will be repeated as many times as necessary to cover the entire image.
+        tilt_angle: float
+            angle of the watermark
+        raise_on_incomp: bool
+            if True, raise an error if the watermark cannot be repeated the number of times specified in occurrs. If False, the watermark will be repeated as many times as possible.
     """
 
     h_image, w_image, *_ = image_shape
@@ -131,12 +140,14 @@ def get_water_mark(image_shape: np.ndarray, watermark_text:str, font_size:int, t
     return water_mark
 
     
-def add_water_mark(image: np.ndarray, watermark: np.ndarray, alpha )-> np.ndarray:
+def add_water_mark(image: npt.NDArray[np.uint8], watermark:npt.NDArray[np.uint8], alpha )-> npt.NDArray[np.uint8]:
     """
     Wrapper for cv2.addWeighted
 
-    Params:
-        image: image to be watermarked
+    Parameters
+    ----------
+        image:  
+            image to be watermarked
         watermark: watermark image
         alpha: transparency of the watermark
     """
